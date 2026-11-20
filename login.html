@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>লগইন | RRR Topup - BD Gaming Topup</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        dark: {
+                            900: '#070914',
+                            800: '#0c0f24',
+                            700: '#12163a',
+                            600: '#1a1f4d',
+                            500: '#232a66',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', '"Hind Siliguri"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
+            background: radial-gradient(circle at 50% 10%, #171d47 0%, #080a18 70%);
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        .glow-card {
+            background: rgba(18, 22, 58, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.2), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .input-box {
+            background: rgba(11, 14, 38, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .input-box:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            outline: none;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            transition: all 0.25s ease;
+        }
+        .btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between py-6 px-4">
+
+    <!-- Top Navigation Bar -->
+    <header class="max-w-md w-full mx-auto flex items-center justify-between mb-4">
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 rounded-lg bg-dark-700 border border-primary-500/30 flex items-center justify-center text-primary-400 group-hover:bg-primary-500 group-hover:text-white transition">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+            </div>
+            <span class="text-xs font-semibold text-slate-400 group-hover:text-white transition">হোম পেজে ফিরুন</span>
+        </a>
+
+        <!-- Cloud Server Status -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>Cloud Server Live 🟢</span>
+        </div>
+    </header>
+
+    <!-- Main Login Card -->
+    <main class="max-w-md w-full mx-auto">
+        <div class="glow-card rounded-2xl p-6 sm:p-8">
+            <!-- Brand Logo & Header -->
+            <div class="text-center mb-6">
+                <a href="index.html" class="inline-block mb-3">
+                    <img src="images/logo.png" alt="RRR Topup" class="h-10 mx-auto object-contain"
+                         onerror="this.src='https://apis.rrrtopup.com/uploads/images/1793198575181-1768754618825-logo0d22abf7_1.png'">
+                </a>
+                <h1 class="text-xl sm:text-2xl font-black text-white tracking-wide">অ্যাকাউন্টে লগইন করুন</h1>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">আপনার মোবাইল নম্বর ও পাসওয়ার্ড দিয়ে সাইন-ইন করুন</p>
+            </div>
+
+            <!-- Error / Success Alert Box -->
+            <div id="alert-box" class="hidden mb-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2"></div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- Phone Number -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        <i class="fa-solid fa-phone text-primary-400 mr-1.5"></i> মোবাইল নাম্বার (Phone Number) <span class="text-rose-400">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">+88</span>
+                        <input type="tel" id="log-phone" required placeholder="01XXXXXXXXX" maxlength="11"
+                               class="w-full pl-12 pr-3.5 py-2.5 rounded-xl input-box text-sm font-mono">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-300">
+                            <i class="fa-solid fa-lock text-primary-400 mr-1.5"></i> পাসওয়ার্ড (Password) <span class="text-rose-400">*</span>
+                        </label>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="log-password" required placeholder="আপনার পাসওয়ার্ড লিখুন"
+                               class="w-full pl-3.5 pr-10 py-2.5 rounded-xl input-box text-sm">
+                        <button type="button" onclick="togglePassVisibility('log-password', 'eye-icon-log')"
+                                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition">
+                            <i id="eye-icon-log" class="fa-solid fa-eye-slash text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn"
+                        class="w-full py-3 rounded-xl btn-gradient text-white font-bold text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>লগইন করুন (Sign In)</span>
+                </button>
+            </form>
+
+            <!-- Quick Phone Login fallback option -->
+            <div class="mt-4 text-center">
+                <button onclick="toggleQuickLogin()" class="text-xs text-primary-400 hover:text-primary-300 font-semibold hover:underline">
+                    <i class="fa-solid fa-bolt mr-1"></i> ওয়ান-ক্লিক ইনস্ট্যান্ট লগইন (পাসওয়ার্ড ছাড়া)
+                </button>
+            </div>
+
+            <div id="quick-login-box" class="hidden mt-3 p-3 rounded-xl bg-dark-900 border border-primary-500/20 space-y-3">
+                <p class="text-[11px] text-slate-300">নাম ও ফোন দিয়ে পাসওয়ার্ড ছাড়া সরাসরি লগইন করুন:</p>
+                <input type="text" id="quick-name" placeholder="আপনার পুরো নাম" class="w-full px-3 py-2 rounded-lg input-box text-xs">
+                <button onclick="handleQuickLogin()" class="w-full py-2 bg-primary-600 hover:bg-primary-500 rounded-lg text-white font-bold text-xs transition">
+                    ইনস্ট্যান্ট লগইন করুন
+                </button>
+            </div>
+
+            <!-- Signup divider -->
+            <div class="relative my-6 text-center">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-700/60"></div></div>
+                <span class="relative px-3 bg-dark-700 text-[11px] text-slate-400 rounded-full font-medium">নতুন ইউজার?</span>
+            </div>
+
+            <!-- Create Account Link -->
+            <div class="text-center">
+                <a href="signup.html" class="block w-full py-2.5 rounded-xl border border-primary-500/30 bg-primary-500/10 hover:bg-primary-500/20 text-primary-300 font-bold text-xs transition">
+                    <i class="fa-solid fa-user-plus mr-1.5"></i> নতুন অ্যাকাউন্ট তৈরি করুন (Sign Up)
+                </a>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-center gap-4 text-xs text-slate-400">
+                    <a href="index.html" class="hover:text-primary-400 transition"><i class="fa-solid fa-house mr-1"></i> হোম পেজে ফিরুন</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="text-center text-[11px] text-slate-500 mt-6">
+        © 2026 RRR Topup. All Rights Reserved. Connected to Secure Cloud Server.
+    </footer>
+
+    <!-- JavaScript & Convex Integration -->
+    <script>
+        const CONVEX_CLOUD_URL = "https://quixotic-cuttlefish-352.convex.cloud";
+
+        const convex = {
+            mutation: async function(path, args = {}) {
+                try {
+                    const res = await fetch(`${CONVEX_CLOUD_URL}/api/mutation`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ path, args })
+                    });
+                    const data = await res.json();
+                    if (data.status === "success") return data.value;
+                    return { success: false, message: data.errorMessage || "Server error" };
+                } catch (err) {
+                    console.error("Convex mutation failed:", err);
+                    return { success: false, message: "সার্ভারে কানেক্ট হতে সমস্যা হচ্ছে!" };
+                }
+            }
+        };
+
+        function showAlert(msg, type = "error") {
+            const box = document.getElementById("alert-box");
+            if (!box) return;
+            if (type === "success") {
+                box.className = "mb-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-fadeIn";
+                box.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>${msg}</span>`;
+            } else {
+                box.className = "mb-4 p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-fadeIn";
+                box.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>${msg}</span>`;
+            }
+        }
+
+        function togglePassVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        }
+
+        function toggleQuickLogin() {
+            const box = document.getElementById("quick-login-box");
+            if (box) box.classList.toggle("hidden");
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submit-btn");
+            const phone = document.getElementById("log-phone").value.trim();
+            const pass = document.getElementById("log-password").value;
+
+            if (!phone) {
+                showAlert("অনুগ্রহ করে আপনার মোবাইল নম্বর অথবা ইমেইল লিখুন!");
+                return;
+            }
+            if (!pass) {
+                showAlert("অনুগ্রহ করে পাসওয়ার্ড লিখুন!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>যাচাই করা হচ্ছে...</span>`;
+
+            try {
+                // Call Convex Auth API (No OTP required)
+                const res = await convex.mutation("auth:signIn", {
+                    identifier: phone,
+                    password: pass
+                });
+
+                if (res && res.success) {
+                    showAlert(res.message || "স্বাগতম! আপনি সফলভাবে লগইন করেছেন। (কোনো ওটিপি ছাড়াই)", "success");
+                    
+                    if (res.token) {
+                        localStorage.setItem("rrrtopup_auth_token", res.token);
+                    }
+                    const userObj = {
+                        _id: res.user._id,
+                        name: res.user.name,
+                        phone: res.user.phone,
+                        email: res.user.email || "",
+                        balance: res.user.balance || 0,
+                        role: res.user.role || "user"
+                    };
+                    localStorage.setItem("rrrtopup_user", JSON.stringify(userObj));
+                    localStorage.setItem("rrrtopup_balance", (res.user.balance || 0).toString());
+
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1000);
+                } else {
+                    showAlert(res.message || "ভুল মোবাইল নাম্বার/ইমেইল বা পাসওয়ার্ড!");
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> <span>লগইন করুন (Sign In)</span>`;
+                }
+            } catch (err) {
+                showAlert("সার্ভার ত্রুটি! ইন্টারনেট সংযোগ চেক করুন।");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> <span>লগইন করুন (Sign In)</span>`;
+            }
+        }
+
+        async function handleQuickLogin() {
+            const name = document.getElementById("quick-name").value.trim();
+            const phone = document.getElementById("log-phone").value.trim();
+            if (!name || !phone) {
+                showAlert("নাম ও ফোন নাম্বার দুইটিই পূরণ করুন!");
+                return;
+            }
+
+            try {
+                const dbUser = await convex.mutation("users:login", { name, phone });
+                if (dbUser) {
+                    showAlert("সফলভাবে লগইন হয়েছে!", "success");
+                    const userObj = {
+                        name: dbUser.name || name,
+                        phone: dbUser.phone || phone,
+                        balance: dbUser.balance || 0,
+                        role: dbUser.role || "user"
+                    };
+                    localStorage.setItem("rrrtopup_user", JSON.stringify(userObj));
+                    localStorage.setItem("rrrtopup_balance", (dbUser.balance || 0).toString());
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1000);
+                }
+            } catch(e) {
+                showAlert("লগইন ব্যর্থ হয়েছে!");
+            }
+        }
+    </script>
+</body>
+</html>

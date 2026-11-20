@@ -1,0 +1,443 @@
+{
+  "productData": {
+    "product": {
+      "id": 21,
+      "name": "UID Topup [BD]",
+      "logo": "images-1791123922354.jpg",
+      "input_lavel": "",
+      "input_placeholder": "",
+      "input_fields": null,
+      "rules": "<p><strong>► অর্ডার করার আগে অবশ্যই ভালোভাবে রুলস গুলো পড়ে নেবেন</strong><br/>‎ ‎ ‎</p><p>⦿ শুধুমাত্র বাংলাদেশ সার্ভার এর আইডিতে টপ আপ করতে পারবেন।<br/>⦿ Player ID Code ভুল দিয়ে Diamond না পেলে RRR TOPUP কর্তৃপক্ষ দায়ী নয় ।<br/>⦿ আইডি কোড দিয়ে অর্ডার করলে এবং কোনো কারণে ডায়মন্ড না গেলে চেক করার জন্য গেইম এর লগিন ইনফো আইডি পাসওয়ার্ড দিতে হবে।<br/>⦿ ডেলিভারি টাইম সাধারণত ১-২ মিনিট এর মধ্যেই হয়ে থাকে, ইভেন্ট থাকলে ২-৩ ঘণ্টা বা তার ও বেশি সময় লাগতে পারে।    <br/>⦿ সার্ভারে সমস্যা থাকলে অথবা স্টক না থাকলে সর্বোচ্চ ২৪ ঘন্টা পর্যন্ত লাগতে পারে। ২৪ ঘন্টার মধ্যে রিফান্ড চাইলে ওয়ালেট এ রিফান্ড করে দেওয়া হবে। </p>",
+      "topup_type": "id_code",
+      "spent_amount_offer": 0,
+      "video_link": "",
+      "video_label": "",
+      "check_id": 1,
+      "banner_badges": [
+        "Safety Guarantee",
+        "Instant (AI) Delivery",
+        "Bangladesh Region",
+        "Official Top-Up"
+      ]
+    },
+    "packages": [
+      {
+        "id": 136,
+        "product_id": 21,
+        "name": "Weekly",
+        "price": "155",
+        "tag": "161",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 1,
+        "package_ids": [
+          334
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 137,
+        "product_id": 21,
+        "name": "Monthly",
+        "price": "770",
+        "tag": "800",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 2,
+        "package_ids": [
+          333
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 127,
+        "product_id": 21,
+        "name": "25 Daimond💎",
+        "price": "20",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 3,
+        "package_ids": [
+          109
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 128,
+        "product_id": 21,
+        "name": "50 Daimond💎",
+        "price": "35",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 4,
+        "package_ids": [
+          110
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 280,
+        "product_id": 21,
+        "name": "100 Daimond💎",
+        "price": "70",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 5,
+        "package_ids": [
+          110,
+          110
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 129,
+        "product_id": 21,
+        "name": "115 Daimond💎",
+        "price": "78",
+        "tag": "115",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 6,
+        "package_ids": [
+          3
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 130,
+        "product_id": 21,
+        "name": "240 Daimond💎",
+        "price": "156",
+        "tag": "240",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 7,
+        "package_ids": [
+          4
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 281,
+        "product_id": 21,
+        "name": "355 Daimond💎",
+        "price": "237",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 8,
+        "package_ids": [
+          4,
+          3
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 282,
+        "product_id": 21,
+        "name": "480 Daimond💎",
+        "price": "315",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 9,
+        "package_ids": [
+          4,
+          4
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 283,
+        "product_id": 21,
+        "name": "505 Daimond💎",
+        "price": "332",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 10,
+        "package_ids": [
+          4,
+          4,
+          109
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 131,
+        "product_id": 21,
+        "name": "610 Daimond💎",
+        "price": "395",
+        "tag": "610",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 11,
+        "package_ids": [
+          5
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 284,
+        "product_id": 21,
+        "name": "850 Daimond💎",
+        "price": "558",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 12,
+        "package_ids": [
+          4,
+          5
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 285,
+        "product_id": 21,
+        "name": "1090 Daimond💎",
+        "price": "710",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 13,
+        "package_ids": [
+          4,
+          5,
+          4
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 132,
+        "product_id": 21,
+        "name": "1240 Daimond💎",
+        "price": "795",
+        "tag": "1240",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 14,
+        "package_ids": [
+          6
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 286,
+        "product_id": 21,
+        "name": "1720 Diamond💎",
+        "price": "1110",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 15,
+        "package_ids": [
+          4,
+          4,
+          6
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 287,
+        "product_id": 21,
+        "name": "2090 Diamond💎",
+        "price": "1350",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 16,
+        "package_ids": [
+          5,
+          4,
+          6
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 133,
+        "product_id": 21,
+        "name": "2530 Daimond💎",
+        "price": "1590",
+        "tag": "2530",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 17,
+        "package_ids": [
+          7
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 288,
+        "product_id": 21,
+        "name": "4010 Diamond💎",
+        "price": "2550",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 18,
+        "package_ids": [
+          4,
+          7,
+          6
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 289,
+        "product_id": 21,
+        "name": "5060 Daimond💎",
+        "price": "3180",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 19,
+        "package_ids": [
+          7,
+          7
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 290,
+        "product_id": 21,
+        "name": "10120 Diamond💎",
+        "price": "6360",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 20,
+        "package_ids": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 291,
+        "product_id": 21,
+        "name": "2x Weekly",
+        "price": "310",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 21,
+        "package_ids": [
+          334,
+          334
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 292,
+        "product_id": 21,
+        "name": "3x Weekly",
+        "price": "465",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 22,
+        "package_ids": [
+          334,
+          334,
+          334
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 293,
+        "product_id": 21,
+        "name": "5x Weekly",
+        "price": "775",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 23,
+        "package_ids": [
+          334,
+          334,
+          334,
+          334,
+          334
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      },
+      {
+        "id": 294,
+        "product_id": 21,
+        "name": "2x Monthly",
+        "price": "1540",
+        "tag": "",
+        "in_stock": 1,
+        "is_auto": 1,
+        "sort_order": 24,
+        "package_ids": [
+          333,
+          333
+        ],
+        "limits": 0,
+        "image": "1793179281-topup21-package.webp",
+        "badges": []
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 30,
+      "total": 24,
+      "totalPage": 1,
+      "hasMore": false
+    }
+  }
+}
