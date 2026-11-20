@@ -441,7 +441,7 @@
                     <div class="w-12 h-0.5 bg-blue-500 mx-auto mt-1.5 rounded-full"></div>
 
                     <div class="mt-4 p-5 rounded-2xl bg-[#0c102a] border border-slate-800 text-center">
-                        <div class="text-sm font-bold text-white">Rrr Topup</div>
+                        <div class="text-sm font-bold text-white">Mr.TopUp</div>
                         <div class="text-xs text-slate-400 mt-1 flex items-center justify-center gap-1.5">
                             <i class="fa-regular fa-envelope text-blue-400"></i>
                             <span>Email: rrrtopup526@gmail.com</span>
@@ -666,7 +666,7 @@
                 <div id="topup-desc-text" class="text-[11px] text-slate-300 leading-relaxed space-y-1.5 pt-1 border-t border-slate-800">
                     <p class="font-bold text-white">► অর্ডার করার আগে অবশ্যই ভালোভাবে রুলস গুলো পড়ে নেবেন</p>
                     <p>⦿ শুধুমাত্র বাংলাদেশ সার্ভার এর আইডিতে টপ আপ করতে পারবেন।</p>
-                    <p>⦿ Player ID Code ভুল দিয়ে Diamond না পেলে RRR TOPUP কর্তৃপক্ষ দায়ী নয়।</p>
+                    <p>⦿ Player ID Code ভুল দিয়ে Diamond না পেলে Mr.TopUp কর্তৃপক্ষ দায়ী নয়।</p>
                     <p>⦿ আইডি কোড দিয়ে অর্ডার করলে এবং কোনো কারণে ডায়মন্ড না গেলে চেক করার জন্য গেইম এর লগইন ইনফো আইডি পাসওয়ার্ড দিতে হবে।</p>
                     <p>⦿ ডেলিভারি টাইম সাধারণত ১-২ মিনিট এর মধ্যেই হয়ে থাকে, ইভেন্ট থাকলে ২-৩ ঘণ্টা বা তার ও বেশি সময় লাগতে পারে।</p>
                     <p>⦿ সার্ভারে সমস্যা থাকলে অথবা স্টক না থাকলে সর্বোচ্চ ২৪ ঘণ্টা পর্যন্ত লাগতে পারে। ২৪ ঘণ্টার মধ্যে রিফান্ড চাইলে ওয়ালেট এ রিফান্ড করে দেওয়া হবে।</p>
@@ -1048,7 +1048,7 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <input type="text" id="order-search-input" placeholder="e.g. RRR-202611-98421 or UID"
+                        <input type="text" id="order-search-input" placeholder="e.g. MRT-202611-98421 or UID"
                                class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#141638] border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-blue-500">
                         <button onclick="searchOrderStatus(document.getElementById('order-search-input').value)"
                                 class="px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs transition">
@@ -1545,7 +1545,7 @@
                     descEl.innerHTML = `
                         <p class="font-bold text-white">► অর্ডার করার আগে অবশ্যই ভালোভাবে রুলস গুলো পড়ে নেবেন</p>
                         <p>⦿ শুধুমাত্র বাংলাদেশ সার্ভার এর আইডিতে টপ আপ করতে পারবেন।</p>
-                        <p>⦿ Player ID Code ভুল দিয়ে Diamond না পেলে RRR TOPUP কর্তৃপক্ষ দায়ী নয়।</p>
+                        <p>⦿ Player ID Code ভুল দিয়ে Diamond না পেলে Mr.TopUp কর্তৃপক্ষ দায়ী নয়।</p>
                         <p>⦿ আইডি কোড দিয়ে অর্ডার করলে এবং কোনো কারণে ডায়মন্ড না গেলে চেক করার জন্য গেইম এর লগইন ইনফো আইডি পাসওয়ার্ড দিতে হবে।</p>
                         <p>⦿ ডেলিভারি টাইম সাধারণত ১-২ মিনিট এর মধ্যেই হয়ে থাকে, ইভেন্ট থাকলে ২-৩ ঘণ্টা বা তার ও বেশি সময় লাগতে পারে।</p>
                         <p>⦿ সার্ভারে সমস্যা থাকলে অথবা স্টক না থাকলে সর্বোচ্চ ২৪ ঘণ্টা পর্যন্ত লাগতে পারে। ২৪ ঘণ্টার মধ্যে রিফান্ড চাইলে ওয়ালেট এ রিফান্ড করে দেওয়া হবে।</p>
@@ -1763,7 +1763,7 @@
         async function confirmOrderPurchase() {
             const uid = document.getElementById("chk-uid").textContent;
             const price = parseFloat(selectedPackage.price) || 0;
-            const orderId = "RRR-" + Date.now().toString().slice(-6);
+            const orderId = "MRT-" + Date.now().toString().slice(-6);
             const btnEl = document.getElementById("btn-confirm-order");
 
             // Check wallet balance if paying with wallet
@@ -2920,7 +2920,7 @@
         }
 
         function copyPlayerProfileText(name, uid, region, level, likes, rank) {
-            const summary = `🔥 FREE FIRE PLAYER PROFILE 🔥\n👤 Nickname: ${name}\n🆔 UID: ${uid}\n🌍 Server: ${region}\n👑 Level: ${level}\n❤️ Total Likes: ${likes}\n🏆 BR Rank: ${rank}\n⚡ Checked via RRR TOPUP & FF Auto Like`;
+            const summary = `🔥 FREE FIRE PLAYER PROFILE 🔥\n👤 Nickname: ${name}\n🆔 UID: ${uid}\n🌍 Server: ${region}\n👑 Level: ${level}\n❤️ Total Likes: ${likes}\n🏆 BR Rank: ${rank}\n⚡ Checked via Mr.TopUp & FF Auto Like`;
             navigator.clipboard.writeText(summary);
             alert("প্লেয়ারের সম্পূর্ণ প্রোফাইল ইনফরমেশন মেসেঞ্জার/হোয়াটসঅ্যাপে শেয়ারের জন্য কপি হয়েছে!");
         }

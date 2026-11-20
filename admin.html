@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>অ্যাডমিন প্রো কন্ট্রোল সেন্টার | RRR Topup Admin Portal</title>
+    <title>অ্যাডমিন প্রো কন্ট্রোল সেন্টার | Mr.TopUp Admin Portal</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -194,7 +194,7 @@
             <!-- Brand & Badges -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <a href="index.html" class="flex items-center gap-2">
-                    <img src="images/logo.png" alt="RRR Topup" class="h-8 object-contain"
+                    <img src="images/logo.png" alt="Mr.TopUp" class="h-8 object-contain"
                          onerror="this.src='https://apis.rrrtopup.com/uploads/images/1793198575181-1768754618825-logo0d22abf7_1.png'">
                 </a>
                 <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
@@ -2228,7 +2228,7 @@ Level: ${p.level || 'N/A'}
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `RRR_Topup_Orders_${Date.now()}.csv`;
+            link.download = `MrTopUp_Orders_${Date.now()}.csv`;
             link.click();
             showToast("অর্ডার রিপোর্ট CSV ডাউনলোড হয়েছে!");
         }
