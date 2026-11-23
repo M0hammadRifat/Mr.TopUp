@@ -44,6 +44,76 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
         super().do_GET()
 
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        if path == "/api/nagorikpay-create":
+            self.handle_nagorikpay_create()
+            return
+
+        if path == "/api/nagorikpay-verify":
+            self.handle_nagorikpay_verify()
+            return
+
+        super().do_POST()
+
+    def handle_nagorikpay_create(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+        api_key = self.headers.get('API-KEY') or "QPV0SE6Ivx8u157l7yTWLYT31bp9aI8a4d6Is6h6Y2rp0yhyFH"
+        url = f"https://secure-pay.nagorikpay.com/api/payment/create?api_key={urllib.parse.quote(api_key)}"
+        try:
+            req = urllib.request.Request(url, data=body, headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Mozilla/5.0"
+            })
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = resp.read()
+                self.send_response(resp.status)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(data)
+        except urllib.error.HTTPError as he:
+            err_data = he.read()
+            self.send_response(he.code)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(err_data if err_data else json.dumps({"status": 0, "message": str(he)}).encode())
+        except Exception as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": 0, "message": str(e)}).encode())
+
+    def handle_nagorikpay_verify(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+        api_key = self.headers.get('API-KEY') or "QPV0SE6Ivx8u157l7yTWLYT31bp9aI8a4d6Is6h6Y2rp0yhyFH"
+        url = f"https://secure-pay.nagorikpay.com/api/transaction/verify?api_key={urllib.parse.quote(api_key)}"
+        try:
+            req = urllib.request.Request(url, data=body, headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Mozilla/5.0"
+            })
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = resp.read()
+                self.send_response(resp.status)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(data)
+        except urllib.error.HTTPError as he:
+            err_data = he.read()
+            self.send_response(he.code)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(err_data if err_data else json.dumps({"status": "error", "message": str(he)}).encode())
+        except Exception as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode())
+
     def handle_check_player(self, query_str):
         params = urllib.parse.parse_qs(query_str)
         uid = params.get("uid", [""])[0].strip() or params.get("id", [""])[0].strip()

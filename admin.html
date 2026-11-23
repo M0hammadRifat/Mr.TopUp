@@ -1069,6 +1069,47 @@
                     </form>
                 </div>
 
+                <!-- NagorikPay Auto Gateway Manager -->
+                <div class="admin-card rounded-2xl p-5 border border-blue-500/30 space-y-3.5">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-blue-400"></i> NagorikPay অটো পেমেন্ট গেটওয়ে
+                        </h4>
+                        <span id="nagorikpay-badge" class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-bold">CONNECTED</span>
+                    </div>
+
+                    <form onsubmit="handleSaveNagorikPaySettings(event)" class="space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-semibold text-slate-300">NagorikPay API Key</label>
+                                <span class="text-[10px] text-emerald-400 font-mono">Live Key</span>
+                            </div>
+                            <input type="text" id="setting-nagorikpay-key" value="QPV0SE6Ivx8u157l7yTWLYT31bp9aI8a4d6Is6h6Y2rp0yhyFH" required
+                                   class="w-full px-3.5 py-2 rounded-xl bg-dark-900 border border-slate-700 text-xs text-white font-mono focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-dark-900 border border-slate-800">
+                            <div>
+                                <div class="text-xs font-bold text-white">অটো পেমেন্ট গেটওয়ে সক্রিয় রাখুন</div>
+                                <div class="text-[10px] text-slate-400">Add Money ও Checkout-এ NagorikPay বাটন দেখাবে</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="setting-nagorikpay-active" checked class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="submit" class="py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-floppy-disk text-xs"></i> সেভ করুন
+                            </button>
+                            <button type="button" onclick="testNagorikPayConnection()" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-blue-500/30 text-blue-300 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-vial text-xs"></i> কানেকশন টেস্ট
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Payment Numbers Manager -->
                 <div class="admin-card rounded-2xl p-5 border border-emerald-500/30 space-y-3.5">
                     <div class="flex items-center justify-between">
@@ -2792,6 +2833,48 @@ Level: ${p.level || 'N/A'}
             showToast("সাইট নোটিশ সফলভাবে আপডেট হয়েছে!");
         }
 
+        function handleSaveNagorikPaySettings(e) {
+            e.preventDefault();
+            const key = document.getElementById("setting-nagorikpay-key").value.trim();
+            const active = document.getElementById("setting-nagorikpay-active").checked;
+            localStorage.setItem("mrtopup_nagorikpay_key", key);
+            localStorage.setItem("mrtopup_nagorikpay_active", active ? "true" : "false");
+            const badge = document.getElementById("nagorikpay-badge");
+            if (badge) {
+                badge.textContent = active ? "CONNECTED" : "DISABLED";
+                badge.className = active 
+                    ? "px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-bold"
+                    : "px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/40 text-[10px] font-bold";
+            }
+            logAuditAction("NagorikPay Updated", `API Key ও স্ট্যাটাস (${active ? 'Active' : 'Disabled'}) আপডেট হয়েছে`);
+            showToast("NagorikPay সেটিংস সফলভাবে সেভ হয়েছে!");
+        }
+
+        async function testNagorikPayConnection() {
+            const key = document.getElementById("setting-nagorikpay-key").value.trim();
+            if (!key) {
+                alert("API Key লিখুন!");
+                return;
+            }
+            showToast("NagorikPay সার্ভারের সাথে সংযোগ যাচাই করা হচ্ছে...");
+            try {
+                const proxyUrl = "https://corsproxy.net/?u=" + encodeURIComponent(`https://secure-pay.nagorikpay.com/api/payment/create?api_key=${encodeURIComponent(key)}`);
+                const res = await fetch(proxyUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "amount=10&success_url=" + encodeURIComponent("https://m0hammadrifat.github.io/Mr.TopUp/?status=success") + "&cancel_url=" + encodeURIComponent("https://m0hammadrifat.github.io/Mr.TopUp/?status=cancel")
+                });
+                const data = await res.json();
+                if (data.status === 1 && data.payment_url) {
+                    alert(`✅ NagorikPay সফলভাবে সংযুক্ত হয়েছে!\n\nAPI Status: Active (Online)\nTest Payment Link: ${data.payment_url}\n\nআপনার গেটওয়ে সম্পূর্ণ রেডি!`);
+                } else {
+                    alert(`⚠️ সংযোগ ব্যর্থ: ${data.message || JSON.stringify(data)}`);
+                }
+            } catch (err) {
+                alert("ত্রুটি: " + err.message);
+            }
+        }
+
         function handleSavePaymentNumbers(e) {
             e.preventDefault();
             const bk = document.getElementById("setting-bkash-no").value.trim();
@@ -3061,6 +3144,19 @@ Level: ${p.level || 'N/A'}
 
             const savedNagad = localStorage.getItem("rrrtopup_nagad_no");
             if (savedNagad) document.getElementById("setting-nagad-no").value = savedNagad;
+
+            const savedNagorikKey = localStorage.getItem("mrtopup_nagorikpay_key") || "QPV0SE6Ivx8u157l7yTWLYT31bp9aI8a4d6Is6h6Y2rp0yhyFH";
+            if (document.getElementById("setting-nagorikpay-key")) document.getElementById("setting-nagorikpay-key").value = savedNagorikKey;
+
+            const savedNagorikActive = localStorage.getItem("mrtopup_nagorikpay_active") !== "false";
+            if (document.getElementById("setting-nagorikpay-active")) document.getElementById("setting-nagorikpay-active").checked = savedNagorikActive;
+            const badge = document.getElementById("nagorikpay-badge");
+            if (badge) {
+                badge.textContent = savedNagorikActive ? "CONNECTED" : "DISABLED";
+                badge.className = savedNagorikActive 
+                    ? "px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-bold"
+                    : "px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/40 text-[10px] font-bold";
+            }
         });
     </script>
 </body>
