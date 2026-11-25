@@ -91,5 +91,18 @@ export default defineSchema({
     created_at: v.string(),
     claimed_at: v.optional(v.string()),
   }).index("by_trx_id", ["trx_id"]).index("by_status", ["status"]),
+
+  raw_sms_logs: defineTable({
+    sender: v.string(),
+    message: v.string(),
+    gateway: v.string(),
+    is_payment: v.boolean(),
+    trx_id: v.optional(v.string()),
+    amount: v.optional(v.number()),
+    sim_slot: v.optional(v.string()),
+    device_id: v.optional(v.string()),
+    received_at: v.optional(v.string()),
+    created_at: v.string(),
+  }).index("by_created_at", ["created_at"]),
 });
 

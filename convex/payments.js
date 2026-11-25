@@ -1,21 +1,42 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Helper function to parse bKash, Nagad, Rocket, Upay SMS
+// Helper function to parse bKash, Nagad, Rocket, Upay incoming payment SMS
 export function parsePaymentSms(sender, message) {
   if (!message) return null;
   const text = message.trim();
   const lower = text.toLowerCase();
+  const senderLower = (sender || "").toLowerCase();
 
   let gateway = "other";
-  if (lower.includes("bkash") || (sender && (sender.includes("16247") || sender.toLowerCase().includes("bkash")))) {
+  if (lower.includes("bkash") || senderLower.includes("16247") || senderLower.includes("bkash")) {
     gateway = "bkash";
-  } else if (lower.includes("nagad") || (sender && (sender.includes("16167") || sender.toLowerCase().includes("nagad"))) || (lower.includes("txnid") && lower.includes("money received"))) {
+  } else if (lower.includes("nagad") || senderLower.includes("16167") || senderLower.includes("nagad") || (lower.includes("txnid") && lower.includes("money received"))) {
     gateway = "nagad";
-  } else if (lower.includes("rocket") || (sender && (sender.includes("16216") || sender.toLowerCase().includes("rocket")))) {
+  } else if (lower.includes("rocket") || senderLower.includes("16216") || senderLower.includes("rocket")) {
     gateway = "rocket";
-  } else if (lower.includes("upay") || (sender && sender.toLowerCase().includes("upay"))) {
+  } else if (lower.includes("upay") || senderLower.includes("upay")) {
     gateway = "upay";
+  } else if (lower.includes("cellfin") || senderLower.includes("cellfin")) {
+    gateway = "cellfin";
+  }
+
+  // Reject outgoing transactions so syncing all phone SMS never causes false-positive deposits
+  const isOutgoing =
+    lower.includes("cash out") ||
+    lower.includes("you have sent") ||
+    lower.includes("sent tk") ||
+    lower.includes("send money") ||
+    lower.includes("mobile recharge") ||
+    lower.includes("recharge of") ||
+    lower.includes("paid tk") ||
+    lower.includes("payment of") ||
+    lower.includes("bill pay") ||
+    lower.includes("your otp") ||
+    lower.includes("verification code");
+
+  if (isOutgoing && !lower.includes("received")) {
+    return null;
   }
 
   // Extract TrxID: e.g. TrxID 9K8L7M6N5P or TxnID: 71ABCDEF or Trx ID: 9K8L7M6N5P or 76B8FLCZ
@@ -24,8 +45,8 @@ export function parsePaymentSms(sender, message) {
 
   // Extract Amount: e.g. Tk 500.00, Tk. 500, Amount: Tk 500.00, 500 Tk, 500/-, Amount 500
   let amount = null;
-  const amtMatch1 = text.match(/(?:Amount:?\s*(?:Tk\.?|৳)?|received(?:\s+deposit\s+of)?\s*(?:Tk\.?|৳)?|(?:Tk\.?|৳))\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-  const amtMatch2 = text.match(/([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:Tk\.?|৳|BDT|\/-)/i);
+  const amtMatch1 = text.match(/(?:Amount:?\s*(?:Tk\.?|৳)?|received(?:\s+deposit\s+of)?\s*(?:Tk\.?|৳)?|cash\s*in\s*(?:of)?\s*(?:Tk\.?|৳)?|(?:Tk\.?|৳))\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+  const amtMatch2 = text.match(/([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:Tk\.?|৳|BDT|\/-|টাকা)/i);
   const amtMatch3 = text.match(/(?:Amount|টাকা)[:\s]*([0-9,]+(?:\.[0-9]{1,2})?)/i);
 
   if (amtMatch1) {
@@ -47,146 +68,225 @@ export function parsePaymentSms(sender, message) {
   return { gateway, trxId, amount, senderNumber, rawMessage: text };
 }
 
+// Shared helper to process a single SMS, log raw record if requested, and auto-match deposits/orders
+async function processSingleSms(ctx, args) {
+  const parsed = parsePaymentSms(args.sender, args.message);
+  const nowStr = new Date().toISOString();
+
+  if (args.log_raw || !parsed) {
+    const existingRaw = await ctx.db
+      .query("raw_sms_logs")
+      .order("desc")
+      .take(40);
+    const isDupRaw = existingRaw.some(
+      (r) => r.sender === args.sender && r.message === args.message
+    );
+    if (!isDupRaw) {
+      await ctx.db.insert("raw_sms_logs", {
+        sender: args.sender || "unknown",
+        message: args.message,
+        gateway: parsed ? parsed.gateway : "general",
+        is_payment: Boolean(parsed),
+        trx_id: parsed ? parsed.trxId : undefined,
+        amount: parsed ? parsed.amount : undefined,
+        sim_slot: args.sim_slot,
+        device_id: args.device_id,
+        received_at: args.received_at,
+        created_at: nowStr,
+      });
+    }
+  }
+
+  if (!parsed) {
+    return {
+      success: true,
+      ignored: true,
+      auto_matched: false,
+      reason: "Non-payment or outgoing SMS logged safely",
+    };
+  }
+
+  // Check if SMS with this TrxID already recorded
+  const existingSms = await ctx.db
+    .query("sms_payments")
+    .withIndex("by_trx_id", (q) => q.eq("trx_id", parsed.trxId))
+    .first();
+
+  if (existingSms) {
+    return {
+      success: true,
+      duplicate: true,
+      auto_matched: existingSms.status === "claimed",
+      message: "Duplicate SMS ignored",
+      trx_id: parsed.trxId,
+      amount: existingSms.amount,
+      gateway: existingSms.gateway,
+    };
+  }
+
+  // 1. Check if there is a pending deposit waiting for this TrxID & Amount
+  const allPendingDeposits = await ctx.db
+    .query("wallet_transactions")
+    .filter((q) => q.eq(q.field("status"), "pending"))
+    .collect();
+
+  const matchedDeposit = allPendingDeposits.find(
+    (d) => d.trx_id && d.trx_id.trim().toUpperCase() === parsed.trxId && Math.abs(d.amount - parsed.amount) <= 1
+  );
+
+  if (matchedDeposit) {
+    await ctx.db.patch(matchedDeposit._id, { status: "completed" });
+
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_phone", (q) => q.eq("phone", matchedDeposit.user_phone))
+      .first();
+
+    let newBal = matchedDeposit.amount;
+    if (user) {
+      newBal = (user.balance || 0) + matchedDeposit.amount;
+      await ctx.db.patch(user._id, { balance: newBal });
+    } else {
+      await ctx.db.insert("users", {
+        name: `User ${matchedDeposit.user_phone.slice(-4)}`,
+        phone: matchedDeposit.user_phone,
+        balance: matchedDeposit.amount,
+        created_at: nowStr,
+      });
+    }
+
+    await ctx.db.insert("sms_payments", {
+      gateway: parsed.gateway,
+      trx_id: parsed.trxId,
+      amount: parsed.amount,
+      sender_number: parsed.senderNumber,
+      raw_message: parsed.rawMessage,
+      status: "claimed",
+      matched_type: "deposit",
+      matched_id: matchedDeposit._id,
+      matched_phone: matchedDeposit.user_phone,
+      created_at: nowStr,
+      claimed_at: nowStr,
+    });
+
+    return {
+      success: true,
+      auto_matched: true,
+      type: "deposit",
+      trx_id: parsed.trxId,
+      amount: parsed.amount,
+      gateway: parsed.gateway,
+      user_phone: matchedDeposit.user_phone,
+      new_balance: newBal,
+    };
+  }
+
+  // 2. Check if there is a pending order waiting for this TrxID & Amount
+  const allPendingOrders = await ctx.db
+    .query("orders")
+    .filter((q) => q.eq(q.field("status"), "pending"))
+    .collect();
+
+  const matchedOrder = allPendingOrders.find(
+    (o) => o.trx_id && o.trx_id.trim().toUpperCase() === parsed.trxId && Math.abs(o.amount - parsed.amount) <= 1
+  );
+
+  if (matchedOrder) {
+    await ctx.db.patch(matchedOrder._id, { status: "processing" });
+
+    await ctx.db.insert("sms_payments", {
+      gateway: parsed.gateway,
+      trx_id: parsed.trxId,
+      amount: parsed.amount,
+      sender_number: parsed.senderNumber,
+      raw_message: parsed.rawMessage,
+      status: "claimed",
+      matched_type: "order",
+      matched_id: matchedOrder._id,
+      matched_phone: matchedOrder.user_phone || "",
+      created_at: nowStr,
+      claimed_at: nowStr,
+    });
+
+    return {
+      success: true,
+      auto_matched: true,
+      type: "order",
+      trx_id: parsed.trxId,
+      amount: parsed.amount,
+      gateway: parsed.gateway,
+      order_id: matchedOrder.order_id,
+    };
+  }
+
+  // 3. Not matched yet (SMS arrived before user submitted form) -> Save as unclaimed!
+  const smsId = await ctx.db.insert("sms_payments", {
+    gateway: parsed.gateway,
+    trx_id: parsed.trxId,
+    amount: parsed.amount,
+    sender_number: parsed.senderNumber,
+    raw_message: parsed.rawMessage,
+    status: "unclaimed",
+    created_at: nowStr,
+  });
+
+  return {
+    success: true,
+    auto_matched: false,
+    sms_id: smsId,
+    trx_id: parsed.trxId,
+    amount: parsed.amount,
+    gateway: parsed.gateway,
+  };
+}
+
 // Mutation: Save SMS from Webhook & Auto-match with Pending Deposits/Orders
 export const saveSms = mutation({
   args: {
     sender: v.string(),
     message: v.string(),
     secret: v.optional(v.string()),
+    sim_slot: v.optional(v.string()),
+    device_id: v.optional(v.string()),
+    received_at: v.optional(v.string()),
+    log_raw: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const parsed = parsePaymentSms(args.sender, args.message);
-    if (!parsed) {
-      return { success: false, reason: "SMS does not match payment format or amount/TrxID missing" };
+    return await processSingleSms(ctx, args);
+  },
+});
+
+// Mutation: Batch Sync SMS from Android Inbox (old + new SMS)
+export const saveSmsBatch = mutation({
+  args: {
+    messages: v.array(
+      v.object({
+        sender: v.string(),
+        message: v.string(),
+        sim_slot: v.optional(v.string()),
+        device_id: v.optional(v.string()),
+        received_at: v.optional(v.string()),
+        log_raw: v.optional(v.boolean()),
+      })
+    ),
+    secret: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const results = [];
+    let matchedCount = 0;
+    let savedPaymentCount = 0;
+    for (const item of args.messages) {
+      const res = await processSingleSms(ctx, item);
+      if (res.auto_matched) matchedCount++;
+      if (!res.ignored && !res.duplicate) savedPaymentCount++;
+      results.push(res);
     }
-
-    const nowStr = new Date().toISOString();
-
-    // Check if SMS with this TrxID already recorded
-    const existingSms = await ctx.db
-      .query("sms_payments")
-      .withIndex("by_trx_id", (q) => q.eq("trx_id", parsed.trxId))
-      .first();
-
-    if (existingSms) {
-      return { success: true, message: "Duplicate SMS ignored", trx_id: parsed.trxId };
-    }
-
-    // 1. Check if there is a pending deposit waiting for this TrxID & Amount
-    const allPendingDeposits = await ctx.db
-      .query("wallet_transactions")
-      .filter((q) => q.eq(q.field("status"), "pending"))
-      .collect();
-
-    const matchedDeposit = allPendingDeposits.find(
-      (d) => d.trx_id && d.trx_id.trim().toUpperCase() === parsed.trxId && Math.abs(d.amount - parsed.amount) < 1
-    );
-
-    if (matchedDeposit) {
-      // Auto-approve deposit!
-      await ctx.db.patch(matchedDeposit._id, { status: "completed" });
-
-      // Credit user's wallet
-      let user = await ctx.db
-        .query("users")
-        .withIndex("by_phone", (q) => q.eq("phone", matchedDeposit.user_phone))
-        .first();
-
-      let newBal = matchedDeposit.amount;
-      if (user) {
-        newBal = (user.balance || 0) + matchedDeposit.amount;
-        await ctx.db.patch(user._id, { balance: newBal });
-      } else {
-        await ctx.db.insert("users", {
-          name: `User ${matchedDeposit.user_phone.slice(-4)}`,
-          phone: matchedDeposit.user_phone,
-          balance: matchedDeposit.amount,
-          created_at: nowStr,
-        });
-      }
-
-      // Record as claimed
-      const smsId = await ctx.db.insert("sms_payments", {
-        gateway: parsed.gateway,
-        trx_id: parsed.trxId,
-        amount: parsed.amount,
-        sender_number: parsed.senderNumber,
-        raw_message: parsed.rawMessage,
-        status: "claimed",
-        matched_type: "deposit",
-        matched_id: matchedDeposit._id,
-        matched_phone: matchedDeposit.user_phone,
-        created_at: nowStr,
-        claimed_at: nowStr,
-      });
-
-      return {
-        success: true,
-        auto_matched: true,
-        type: "deposit",
-        trx_id: parsed.trxId,
-        amount: parsed.amount,
-        user_phone: matchedDeposit.user_phone,
-        new_balance: newBal,
-      };
-    }
-
-    // 2. Check if there is a pending order waiting for this TrxID & Amount
-    const allPendingOrders = await ctx.db
-      .query("orders")
-      .filter((q) => q.eq(q.field("status"), "pending"))
-      .collect();
-
-    const matchedOrder = allPendingOrders.find(
-      (o) => o.trx_id && o.trx_id.trim().toUpperCase() === parsed.trxId && Math.abs(o.amount - parsed.amount) < 1
-    );
-
-    if (matchedOrder) {
-      // Auto-advance order to processing
-      await ctx.db.patch(matchedOrder._id, { status: "processing" });
-
-      const smsId = await ctx.db.insert("sms_payments", {
-        gateway: parsed.gateway,
-        trx_id: parsed.trxId,
-        amount: parsed.amount,
-        sender_number: parsed.senderNumber,
-        raw_message: parsed.rawMessage,
-        status: "claimed",
-        matched_type: "order",
-        matched_id: matchedOrder._id,
-        matched_phone: matchedOrder.user_phone || "",
-        created_at: nowStr,
-        claimed_at: nowStr,
-      });
-
-      return {
-        success: true,
-        auto_matched: true,
-        type: "order",
-        trx_id: parsed.trxId,
-        amount: parsed.amount,
-        order_id: matchedOrder.order_id,
-      };
-    }
-
-    // 3. Not matched yet (SMS arrived before user submitted form) -> Save as unclaimed!
-    const smsId = await ctx.db.insert("sms_payments", {
-      gateway: parsed.gateway,
-      trx_id: parsed.trxId,
-      amount: parsed.amount,
-      sender_number: parsed.senderNumber,
-      raw_message: parsed.rawMessage,
-      status: "unclaimed",
-      created_at: nowStr,
-    });
-
     return {
       success: true,
-      auto_matched: false,
-      sms_id: smsId,
-      trx_id: parsed.trxId,
-      amount: parsed.amount,
-      gateway: parsed.gateway,
+      processed: args.messages.length,
+      matched: matchedCount,
+      new_payments: savedPaymentCount,
+      results,
     };
   },
 });

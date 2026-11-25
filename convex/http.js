@@ -125,7 +125,11 @@ http.route({
 
       const sender = body.from || body.sender || body.title || body.address || body.origin || url.searchParams.get("from") || url.searchParams.get("sender") || "unknown";
       const message = body.message || body.body || body.content || body.text || body.msg || url.searchParams.get("message") || url.searchParams.get("msg") || rawText || "";
-      const secret = body.secret || url.searchParams.get("secret") || "";
+      const secret = body.secret || url.searchParams.get("secret") || req.headers.get("X-Secret-Key") || "";
+      const sim_slot = body.sim_slot || body.sim ? String(body.sim_slot || body.sim) : undefined;
+      const device_id = body.device_id ? String(body.device_id) : undefined;
+      const received_at = body.received_at ? String(body.received_at) : undefined;
+      const log_raw = body.log_raw === true || body.log_all === true;
 
       if (!message || message.trim().length === 0) {
         return new Response(JSON.stringify({ error: "Missing message field" }), {
@@ -134,7 +138,15 @@ http.route({
         });
       }
 
-      const result = await ctx.runMutation(api.payments.saveSms, { sender, message, secret });
+      const result = await ctx.runMutation(api.payments.saveSms, {
+        sender,
+        message,
+        secret,
+        sim_slot,
+        device_id,
+        received_at,
+        log_raw,
+      });
       return new Response(JSON.stringify(result), {
         status: 200,
         headers: corsHeaders,
@@ -142,6 +154,45 @@ http.route({
     } catch (e) {
       return new Response(JSON.stringify({ error: e.message }), {
         status: 500,
+        headers: corsHeaders,
+      });
+    }
+  }),
+});
+
+// SMS Batch Webhook Preflight & POST (Bulk Inbox Sync)
+http.route({
+  path: "/api/sms-batch",
+  method: "OPTIONS",
+  handler: httpAction(async () => {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }),
+});
+
+http.route({
+  path: "/api/sms-batch",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    try {
+      const body = await req.json();
+      const rawList = Array.isArray(body.messages) ? body.messages : [];
+      const secret = body.secret || req.headers.get("X-Secret-Key") || "";
+      const messages = rawList
+        .filter((m) => m && (m.message || m.body || m.text))
+        .map((m) => ({
+          sender: String(m.from || m.sender || m.address || "unknown"),
+          message: String(m.message || m.body || m.text || ""),
+          sim_slot: m.sim_slot || m.sim ? String(m.sim_slot || m.sim) : undefined,
+          device_id: m.device_id ? String(m.device_id) : undefined,
+          received_at: m.received_at ? String(m.received_at) : undefined,
+          log_raw: m.log_raw === true,
+        }));
+
+      const result = await ctx.runMutation(api.payments.saveSmsBatch, { messages, secret });
+      return new Response(JSON.stringify(result), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ success: false, error: e.message }), {
+        status: 400,
         headers: corsHeaders,
       });
     }
@@ -167,6 +218,7 @@ http.route({
         service: "bKash/Nagad Auto Payment SMS Webhook",
         instructions: "Send POST or GET with ?from=bKash&message=You have received Tk... TrxID 9K8L7M6N",
         endpoint: "/api/sms-webhook",
+        batch_endpoint: "/api/sms-batch",
       }),
       { status: 200, headers: corsHeaders }
     );
